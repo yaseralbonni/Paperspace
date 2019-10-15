@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+"use strict";
+
+
+const app = require("../app");
+const http = require("http");
+
+let portNumber = "8000";
+app.set("port", portNumber);
+
+const server = http.createServer(app);
+const portBinder = ((typeof port === "string") ? "Pipe " : "Port ") + portNumber;
+
+// event listener for HTTP server "error" event
+const onError = (error) => {
+    if (error.syscall !== "listen") 
+        throw error;
+
+    switch (error.code) {
+        case "EACCES":
+            console.error(portBinder + " requires elevated privileges.");
+            process.exit(1);
+            break;
+        case "EADDRINUSE":
+            console.error(portBinder + " is already in use.");
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+};
+
+const onListening = () => {
+    let addr = server.address();
+    console.debug("Listening on " + portBinder);
+};
+
+server.listen(portNumber);
+server.on("error", onError);
+server.on("listening", onListening);
