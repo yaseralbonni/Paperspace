@@ -1,8 +1,12 @@
 "use strict";
 
+// manage project base(root) globally
+global.__basedir = __dirname;
+
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const helpers = require("./helpers");
 const app = express();
 
 
@@ -18,6 +22,9 @@ app.use(function (req, res, next) {
 // JSON as API between frontend and backend
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// routes registration
+helpers.web.registerRoute(app, "/address_records", "./routes/address_records");
 
 // send fail on invalid urls or ones that do not exist
 const invalidURL = { status: "Fail", data: "Accessing an invalid/non-exisitng route." };
