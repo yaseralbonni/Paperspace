@@ -1,13 +1,32 @@
-// Handles all routes for -->  /recommendations/*
+// Handles all routes for -->  /address_records/*
 
 "use strict";
 
 const express = require('express');
 const router = express.Router();
+const helpers = require("../helpers");
 
 
-router.get("/add", (req, res, next) =>{
-    res.send({data: "hello world"});
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS AND HELPERS
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+// REQUESTS HANDLERS
+
+router.get("/create", (req, res, next) =>{
+    
+    const {name, street, city, state, country} = req.query;
+
+    let create = helpers.mongo.createAddressRecord(name, street, city, state, country);
+    create.then(results => {
+        res.send(results);
+    });
 });
 
+
+// export object module
 module.exports = router;
