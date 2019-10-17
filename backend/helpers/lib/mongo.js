@@ -50,9 +50,6 @@ const createAddressRecord = async (name, street, city, state, country) => {
          * however, for simplicity of the task, such criteria is used
          */
 
-        // convert name to lower case for consistency and better comparison
-        name = name.toLowerCase();
-
         let checkRecord = await db.collection("records").findOne({ name: name });
 
         if (checkRecord == null) {
