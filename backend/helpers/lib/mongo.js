@@ -210,8 +210,45 @@ const updateAddressRecord = async (name, street, city, state, country) => {
 
 
 
+/**
+ * retrieve list of records based on multiple conditions: state and country
+ * @param {string} state - state name
+ * @param {string} country - country name
+ * @return Promise<Object>
+ */
+const getAddressRecords = async (state, country) => {
+
+    let _RES = { status: "", data: "" };
+
+    let client = await MongoClient.connect(dbSource, { useNewUrlParser: true });
+    let db = client.db(addressRecordsDB);
+
+    try {
+        let searchQuery = { state: state, country: country };
+
+        let records = await db.collection("records").find(searchQuery).toArray();
+
+        if (records.length != 0) {
+            _RES.status = "success";
+            _RES.data = records;
+        }
+        else {
+            _RES.status = "success";
+            _RES.data = "No address records found.";
+        }
+    } catch (error) {
+        console.log(error);
+    } finally {
+        client.close();
+        return _RES;
+    }
+}
+
+
+
 module.exports = {
     createAddressRecord,
     deleteAddressRecord,
-    updateAddressRecord
+    updateAddressRecord,
+    getAddressRecords
 }

@@ -96,5 +96,17 @@ router.get("/update", (req, res, next) => {
 
 
 
+router.get("/find", (req, res, next) => {
+
+    let {state, country} = req.query;
+
+    let findRecords = helpers.mongo.getAddressRecords(state, country);
+    findRecords.then(results => {
+        res.send(results);
+    });
+});
+
+
+
 // export object module
 module.exports = router;
