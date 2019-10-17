@@ -3,7 +3,23 @@
 // ALL RESPONSE PROMISE OBJECTS HAVE THE FOLLOWING STRUCTURE
 // PROMISE<OBJECT> = {status: "", data: ""};
 // status is a string of two possibilities: success or fail
-// data is a JSON
+// data is a JSON object
+
+/** 
+ * The following criteria is used to create new records:
+ * before adding a record, a check is made against the user name 
+ * to see if it is already present in the database
+ * ideally, a check should be made against a combination of the user name 
+ * and the address given many users can have the same name
+ * however, for simplicity of the task, such criteria is used
+ * 
+ * The following criteria is used to delete a record:
+ * before deleting a record, a check is made against the user name
+ * since for now we are not allowing duplicates of names, then it is
+ * guaranteed to either have only one address per that user or none
+ * if user is found, its address record is removed
+ * if no such user exists, then no deletion happens
+ */
 
 
 "use strict";
@@ -26,6 +42,31 @@ const addressRecordsDB = configs.DBSchema;
 
 
 /**
+ * function checks if address is present in database 
+ * check is made against the user name per the criteria assumed
+ * @param {string} name - user name
+ * @return Promise<boolean>
+ */
+const doesRecordExist = async (name) => {
+
+    let client = await MongoClient.connect(dbSource, { useNewUrlParser: true });
+    let db = client.db(addressRecordsDB);
+
+    try {
+        let checkRecord = await db.collection("records").findOne({ name: name });
+
+        return checkRecord != null;
+
+    } catch (error) {
+        console.log(error);
+    } finally {
+        client.close();
+    }
+}
+
+
+
+/**
  * create address record
  * @param {string} name - individual name
  * @param {string} steet - street name
@@ -42,20 +83,17 @@ const createAddressRecord = async (name, street, city, state, country) => {
     let db = client.db(addressRecordsDB);
 
     try {
-        /* The following criteria is used to create new records:
-         * before adding a record, a check is made against the user name 
-         * to see if it is already present in the database
-         * ideally, a check should be made against a combination of the user name 
-         * and the address given many users can have the same name
-         * however, for simplicity of the task, such criteria is used
-         */
+        let recordExists = await doesRecordExist(name);
 
-        let checkRecord = await db.collection("records").findOne({ name: name });
-
-        if (checkRecord == null) {
+        if (recordExists) {
+            _RES.status = "fail";
+            _RES.data = "Address record already exists.";
+        }
+        else {
             let create = await db.collection("records")
                 .insertOne({
-                    name: name, street: street, city: city, state: state, country: country });
+                    name: name, street: street, city: city, state: state, country: country
+                });
 
             if (create.result["ok"] >= 1) {
                 _RES.status = "success";
@@ -65,10 +103,6 @@ const createAddressRecord = async (name, street, city, state, country) => {
                 _RES.status = "fail";
                 _RES.data = "Address record creation failed.";
             }
-        }
-        else {
-            _RES.status = "fail";
-            _RES.data = "Address record already exists.";
         }
 
     } catch (error) {
@@ -81,6 +115,43 @@ const createAddressRecord = async (name, street, city, state, country) => {
 
 
 
+/**
+ * delete address record of given user
+ * @param {string} user - user name
+ * @return Promise<Object>
+ */
+const deleteAddressRecord = async (name) => {
+
+    let _RES = { status: "", data: "" };
+
+    let client = await MongoClient.connect(dbSource, { useNewUrlParser: true });
+    let db = client.db(addressRecordsDB);
+
+    try {
+        let recordExists = await doesRecordExist(name);
+        if (recordExists) {
+            let deleteRecord = await db.collection("records").deleteOne({ name: name });
+
+            console.log(deleteRecord["result"]); // {n: 1, ok: 1} could be used if criteria changes
+
+            _RES.status = "success";
+            _RES.data = "Address record successfully deleted.";
+        }
+        else {
+            _RES.status = "fail";
+            _RES.data = "Address record does not exist.";
+        }
+    } catch (error) {
+        console.log(error);
+    } finally {
+        client.close();
+        return _RES;
+    }
+}
+
+
+
 module.exports = {
-    createAddressRecord
+    createAddressRecord,
+    deleteAddressRecord
 }

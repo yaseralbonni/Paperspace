@@ -66,5 +66,17 @@ router.get("/create", (req, res, next) => {
 });
 
 
+router.get("/delete", (req, res, next) => {
+
+    let { name } = req.query;
+    name = name.toLowerCase();
+
+    let deleteRecord = helpers.mongo.deleteAddressRecord(name);
+    deleteRecord.then(results => {
+        res.send(results);
+    });
+});
+
+
 // export object module
 module.exports = router;
