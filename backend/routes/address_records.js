@@ -38,6 +38,7 @@ const isStateValid = async (state, country) => {
 }
 
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
 // REQUESTS HANDLERS
@@ -66,6 +67,7 @@ router.get("/create", (req, res, next) => {
 });
 
 
+
 router.get("/delete", (req, res, next) => {
 
     let { name } = req.query;
@@ -76,6 +78,22 @@ router.get("/delete", (req, res, next) => {
         res.send(results);
     });
 });
+
+
+
+router.get("/update", (req, res, next) => {
+
+    let { name, street, city, state, country } = req.query;
+    name = name.toLowerCase();
+
+    // TODO: need to check for state validity before update 
+
+    let updateRecord = helpers.mongo.updateAddressRecord(name, street, city, state, country);
+    updateRecord.then(results => {
+        res.send(results)
+    });
+});
+
 
 
 // export object module

@@ -19,6 +19,12 @@
  * guaranteed to either have only one address per that user or none
  * if user is found, its address record is removed
  * if no such user exists, then no deletion happens
+ * 
+ * The following criteria is used to update a record:
+ * before updating a record, a check is made against the user name
+ * if user is not found, then no update happens
+ * if user is found, only the street, city, state, and country
+ * fields can be updated
  */
 
 
@@ -151,7 +157,61 @@ const deleteAddressRecord = async (name) => {
 
 
 
+/**
+ * update an existing record
+ * @param {string} name - individual name
+ * @param {string} steet - street name
+ * @param {string} city - city name
+ * @param {string} state - state name
+ * @param {string} country - country name
+ * @return Promise<Object> 
+ */
+const updateAddressRecord = async (name, street, city, state, country) => {
+
+    let _RES = { status: "", data: "" };
+
+    let client = await MongoClient.connect(dbSource, { useNewUrlParser: true });
+    let db = client.db(addressRecordsDB);
+
+    try {
+        let recordExists = await doesRecordExist(name);
+        if (recordExists) {
+
+            let updated = {};
+
+            if (street != "")
+                updated["street"] = street;
+            if (city != "")
+                updated["city"] = city;
+            if (state != "")
+                updated["state"] = state;
+            if (country != "")
+                updated["country"] = country;
+
+            let updateRecord = await db.collection("records")
+                .updateOne({ name: name }, { $set: updated });
+
+            console.log(updateRecord["result"]); // {n: 1, nModified: 1, ok: 1} useful information
+
+            _RES.status = "success";
+            _RES.data = "Address record successfully updated.";
+        }
+        else {
+            _RES.status = "fail";
+            _RES.data = "Address record does not exist.";
+        }
+    } catch (error) {
+        console.log(error);
+    } finally {
+        client.close();
+        return _RES;
+    }
+}
+
+
+
 module.exports = {
     createAddressRecord,
-    deleteAddressRecord
+    deleteAddressRecord,
+    updateAddressRecord
 }
