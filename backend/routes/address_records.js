@@ -57,11 +57,16 @@ router.get("/create", (req, res, next) => {
         if (valid) {
             let create = helpers.mongo.createAddressRecord(name, street, city, state, country);
             create.then(results => {
-                res.send(results);
+                if(results["status"] == "success"){
+                    res.send({status: "success", data: "Unique id for newly inserted record: " + results["data"]["_id"]});
+                }
+                else{ // means results["status"] == "fail"
+                    res.send(results); // error/fail message sent from database server
+                }
             });
         }
         else {
-            res.send("State invalid.");
+            res.send({ status: "fail", data: "State invalid." });
         }
     });
 });
@@ -98,7 +103,7 @@ router.get("/update", (req, res, next) => {
 
 router.get("/find", (req, res, next) => {
 
-    let {state, country} = req.query;
+    let { state, country } = req.query;
 
     let findRecords = helpers.mongo.getAddressRecords(state, country);
     findRecords.then(results => {

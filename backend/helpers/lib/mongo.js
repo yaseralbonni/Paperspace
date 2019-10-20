@@ -103,7 +103,7 @@ const createAddressRecord = async (name, street, city, state, country) => {
 
             if (create.result["ok"] >= 1) {
                 _RES.status = "success";
-                _RES.data = create["ops"][0]; // newly generated id for inserted record
+                _RES.data = create["ops"][0]; // newly generated and inserted record - contains all data and unique id
             }
             else {
                 _RES.status = "fail";
@@ -138,7 +138,7 @@ const deleteAddressRecord = async (name) => {
         if (recordExists) {
             let deleteRecord = await db.collection("records").deleteOne({ name: name });
 
-            console.log(deleteRecord["result"]); // {n: 1, ok: 1} could be used if criteria changes
+            console.log(deleteRecord["result"]); // {n: 1, ok: 1} useful information
 
             _RES.status = "success";
             _RES.data = "Address record successfully deleted.";
@@ -230,10 +230,10 @@ const getAddressRecords = async (state, country) => {
 
         if (records.length != 0) {
             _RES.status = "success";
-            _RES.data = records;
+            _RES.data = records; // array of address records objects
         }
         else {
-            _RES.status = "success";
+            _RES.status = "fail";
             _RES.data = "No address records found.";
         }
     } catch (error) {
