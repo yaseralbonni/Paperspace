@@ -56,10 +56,10 @@ router.get("/create", (req, res, next) => {
         if (valid) {
             let create = helpers.mongo.createAddressRecord(name, street, city, state, country);
             create.then(results => {
-                if(results["status"] == "success"){
-                    res.send({status: "success", data: results["data"]["_id"]});
+                if (results["status"] == "success") {
+                    res.send({ status: "success", data: results["data"]["_id"] });
                 }
-                else{ // means results["status"] == "fail"
+                else { // means results["status"] == "fail"
                     res.send(results); // error/fail message sent from database server
                 }
             });
@@ -90,12 +90,28 @@ router.get("/update", (req, res, next) => {
     let { name, street, city, state, country } = req.query;
     name = name.toLowerCase();
 
-    // TODO: need to check for state validity before update 
+    // check validity of state only if field is not empty
+    if (state == "") {
+        let updateRecord = helpers.mongo.updateAddressRecord(name, street, city, state, country);
+        updateRecord.then(results => {
+            res.send(results)
+        });
+    }
+    else {
 
-    let updateRecord = helpers.mongo.updateAddressRecord(name, street, city, state, country);
-    updateRecord.then(results => {
-        res.send(results)
-    });
+        let stateValidity = isStateValid(state, country);
+        stateValidity.then(valid => {
+            if (valid) {
+                let updateRecord = helpers.mongo.updateAddressRecord(name, street, city, state, country);
+                updateRecord.then(results => {
+                    res.send(results)
+                });
+            }
+            else {
+                res.send({ status: "fail", data: "State invalid." });
+            }
+        });
+    }
 });
 
 

@@ -168,7 +168,23 @@ class PaperspaceServerTest(unittest.TestCase):
 
 
 
-    def test_7_delete_record(self):
+    def test_7_update_record_state_invalid(self):
+
+        failed_updates_counter = 0
+
+        for record in SAMPLE_DATA[2:5]:
+            query = "update?name={0}&street={1}&city={2}&state={3}&country={4}"
+            req_result = get_request(SERVER_URL_AND_RECORDS_PATH + query.format(
+                record[0], "new street", "new city", "INVSALID STATE", ""))
+
+            if req_result["status"] == "fail":
+                failed_updates_counter += 1
+
+        self.assertEqual(len(SAMPLE_DATA[2:5]), failed_updates_counter)
+
+
+
+    def test_8_delete_record(self):
         
         successful_delete_counter = 0
 
@@ -183,7 +199,7 @@ class PaperspaceServerTest(unittest.TestCase):
 
 
 
-    def test_8_delete_record_not_exist(self):
+    def test_9_delete_record_not_exist(self):
 
         failed_delete_counter = 0
 
