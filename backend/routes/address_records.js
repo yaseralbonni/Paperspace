@@ -27,7 +27,6 @@ const isStateValid = async (state, country) => {
         console.log("Error - country doesn't have a code");
         return false;
     }
-
     let stateValidationServiceURL = " http://www.groupkt.com/state/search/";
     stateValidationServiceURL += ISOCode + "?text=" + state;
 
@@ -58,7 +57,7 @@ router.get("/create", (req, res, next) => {
             let create = helpers.mongo.createAddressRecord(name, street, city, state, country);
             create.then(results => {
                 if(results["status"] == "success"){
-                    res.send({status: "success", data: "Unique id for newly inserted record: " + results["data"]["_id"]});
+                    res.send({status: "success", data: results["data"]["_id"]});
                 }
                 else{ // means results["status"] == "fail"
                     res.send(results); // error/fail message sent from database server
