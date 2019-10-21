@@ -10,6 +10,8 @@ A suite of unit tests for Paperspace Nodejs backend server
 import unittest
 import requests
 import json
+import time
+
 
 
 # Globals & Constants
@@ -215,4 +217,8 @@ class PaperspaceServerTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    # wait for few seconds before running tests: wait for server to start
+    print("Initializing necessary components for testing ...")
+    time.sleep(6)
+
     unittest.main()
